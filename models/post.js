@@ -11,6 +11,7 @@ const postSchema = new mongoose.Schema(
         content: {
             type: String,
             required: true,
+            minLength: 20
         },
         category: {
             type: String,
@@ -28,6 +29,7 @@ const postSchema = new mongoose.Schema(
         },
         tags: {
             type: [String],
+            default: []
         },
         author: {
             type: mongoose.Schema.Types.ObjectId,
@@ -36,7 +38,6 @@ const postSchema = new mongoose.Schema(
         },
         status: {
             type: String,
-            required: true,
             enum: ["Draft", "Published"],
             default: "Draft",
         },

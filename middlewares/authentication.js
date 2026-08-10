@@ -18,8 +18,8 @@ exports.userAuth = async (req, res, next) => {
         req.user = user;
         next();
     } catch (err) {
-        res.status(500).json({
-            message: "Internal Server Error",
+        res.status(401).json({
+            message: "Unauthorized user",
             error: err.message,
         });
     }
