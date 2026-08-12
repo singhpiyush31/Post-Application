@@ -7,11 +7,13 @@ const postSchema = new mongoose.Schema(
             required: true,
             minLength: 3,
             maxLength: 100,
+            trim: true
         },
         content: {
             type: String,
             required: true,
-            minLength: 20
+            minLength: 20,
+            trim: true
         },
         category: {
             type: String,
@@ -29,7 +31,13 @@ const postSchema = new mongoose.Schema(
         },
         tags: {
             type: [String],
-            default: []
+            default: [],
+            validate: {
+                validator: function (arr) {
+                    return arr.length <= 5
+                },
+                message: "Maximum 5 tags are allowed"
+            }
         },
         author: {
             type: mongoose.Schema.Types.ObjectId,
