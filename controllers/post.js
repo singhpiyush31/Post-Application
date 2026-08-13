@@ -40,7 +40,7 @@ exports.myPost = async (req, res) => {
             limit = 5;
         }
         if (limit > 50) {
-            limit = 10;
+            limit = 50;
         }
 
         const skip = (page - 1) * limit;
