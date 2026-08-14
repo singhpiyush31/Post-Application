@@ -45,11 +45,37 @@ exports.myPost = async (req, res) => {
 
         const skip = (page - 1) * limit;
 
-        const myPost = await Post.find({ author: userId })
+        const filter = { author: req.user._id };
+
+        if (req.query.search) {
+            filter.title = { $regex: req.query.search, $options: "i" };
+        }
+        if (req.query.category) {
+            filter.category = req.query.category;
+        }
+        if (req.query.tags) {
+            filter.tags = req.query.tags;
+        }
+        if (req.query.from || req.query.to) {
+            filter.createdAt = {};
+            if (req.query.from) {
+                filter.createdAt.$gte = req.query.from;
+            }
+            if (req.query.to) {
+                filter.createdAt.$lte = req.query.to;
+            }
+        }
+
+        let sort = -1;
+        if (req.query.sort == "oldest") {
+            sort = 1;
+        }
+
+        const myPost = await Post.find(filter).sort({ createdAt: sort })
             .limit(limit)
             .skip(skip);
 
-        const totalPosts = await Post.countDocuments({ author: userId });
+        const totalPosts = await Post.countDocuments(filter);
         const totalPages = Math.ceil(totalPosts / limit);
 
         res.status(200).json({
@@ -58,7 +84,7 @@ exports.myPost = async (req, res) => {
             pages: totalPages,
             page: page,
             limit: limit,
-            total: totalPosts
+            total: totalPosts,
         });
     } catch (err) {
         res.status(500).json({
