@@ -145,6 +145,7 @@ exports.post = async (req,res) => {
         }
 
         const post = await Post.find(filter)
+            .populate("author", "name email")
             .sort({ createdAt: sort })
             .limit(limit)
             .skip(skip);
