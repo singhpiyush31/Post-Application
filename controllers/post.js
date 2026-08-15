@@ -170,11 +170,35 @@ exports.post = async (req, res) => {
 exports.postById = async (req, res) => {
     try {
         const postId = req.params.id;
-        const post = await Post.findOne({ _id: postId, status: "Published" });
+        const post = await Post.findOne({
+            _id: postId,
+            status: "Published",
+        }).populate("author", "name email");
         if (!post) {
             return res.status(404).json({ message: "Post not found! " });
         }
         res.status(200).json({ message: "Post: ", post });
+    } catch (err) {
+        res.status(500).json({
+            message: "Internal Server Error",
+            error: err.message,
+        });
+    }
+};
+
+exports.deletePostById = async (req, res) => {
+    try {
+        const postId = req.params.id;
+        const loggedInUser = req.user._id;
+
+        const deletePost = await Post.findOneAndDelete({
+            author: loggedInUser,
+            _id: postId,
+        });
+        if(!deletePost) {
+            return res.status(404).json({ message: "Post not found!" });
+        }
+        res.status(200).json({ message: "Post deleted successfully!" });
     } catch (err) {
         res.status(500).json({
             message: "Internal Server Error",
