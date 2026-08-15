@@ -45,10 +45,13 @@ exports.myPost = async (req, res) => {
 
         const skip = (page - 1) * limit;
 
-        const filter = { author: req.user._id };
+        const filter = { author: userId };
 
         if (req.query.search) {
             filter.title = { $regex: req.query.search, $options: "i" };
+        }
+        if(req.query.status) {
+            filter.status = req.query.status;
         }
         if (req.query.category) {
             filter.category = req.query.category;
@@ -71,7 +74,8 @@ exports.myPost = async (req, res) => {
             sort = 1;
         }
 
-        const myPost = await Post.find(filter).sort({ createdAt: sort })
+        const myPost = await Post.find(filter)
+            .sort({ createdAt: sort })
             .limit(limit)
             .skip(skip);
 
@@ -81,6 +85,76 @@ exports.myPost = async (req, res) => {
         res.status(200).json({
             message: "My post: ",
             myPost,
+            pages: totalPages,
+            page: page,
+            limit: limit,
+            total: totalPosts,
+        });
+    } catch (err) {
+        res.status(500).json({
+            message: "Internal Server Error",
+            error: err.message,
+        });
+    }
+};
+
+
+exports.post = async (req,res) => {
+    try {
+
+        let page = parseInt(req.query.page) || 1;
+        let limit = parseInt(req.query.limit) || 5;
+
+        if (page <= 0) {
+            page = 1;
+        }
+        if (limit <= 0) {
+            limit = 5;
+        }
+        if (limit > 50) {
+            limit = 50;
+        }
+
+        const skip = (page - 1) * limit;
+
+        const filter = { status: "Published" };
+
+        if (req.query.search) {
+            filter.title = { $regex: req.query.search, $options: "i" };
+        }
+        
+        if (req.query.category) {
+            filter.category = req.query.category;
+        }
+        if (req.query.tags) {
+            filter.tags = req.query.tags;
+        }
+        if (req.query.from || req.query.to) {
+            filter.createdAt = {};
+            if (req.query.from) {
+                filter.createdAt.$gte = req.query.from;
+            }
+            if (req.query.to) {
+                filter.createdAt.$lte = req.query.to;
+            }
+        }
+
+        let sort = -1;
+        if (req.query.sort == "oldest") {
+            sort = 1;
+        }
+
+        const post = await Post.find(filter)
+            .sort({ createdAt: sort })
+            .limit(limit)
+            .skip(skip);
+
+        const totalPosts = await Post.countDocuments(filter);
+        const totalPages = Math.ceil(totalPosts / limit);
+
+        res.status(200).json({
+            message: "Posts are: ",
+            post,
             pages: totalPages,
             page: page,
             limit: limit,
