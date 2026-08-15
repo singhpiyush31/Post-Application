@@ -50,7 +50,7 @@ exports.myPost = async (req, res) => {
         if (req.query.search) {
             filter.title = { $regex: req.query.search, $options: "i" };
         }
-        if(req.query.status) {
+        if (req.query.status) {
             filter.status = req.query.status;
         }
         if (req.query.category) {
@@ -98,10 +98,8 @@ exports.myPost = async (req, res) => {
     }
 };
 
-
-exports.post = async (req,res) => {
+exports.post = async (req, res) => {
     try {
-
         let page = parseInt(req.query.page) || 1;
         let limit = parseInt(req.query.limit) || 5;
 
@@ -122,7 +120,7 @@ exports.post = async (req,res) => {
         if (req.query.search) {
             filter.title = { $regex: req.query.search, $options: "i" };
         }
-        
+
         if (req.query.category) {
             filter.category = req.query.category;
         }
@@ -145,7 +143,7 @@ exports.post = async (req,res) => {
         }
 
         const post = await Post.find(filter)
-            .populate("author", "name email")
+            .populate("author", "name")
             .sort({ createdAt: sort })
             .limit(limit)
             .skip(skip);
@@ -161,6 +159,22 @@ exports.post = async (req,res) => {
             limit: limit,
             total: totalPosts,
         });
+    } catch (err) {
+        res.status(500).json({
+            message: "Internal Server Error",
+            error: err.message,
+        });
+    }
+};
+
+exports.postById = async (req, res) => {
+    try {
+        const postId = req.params.id;
+        const post = await Post.findOne({ _id: postId, status: "Published" });
+        if (!post) {
+            return res.status(404).json({ message: "Post not found! " });
+        }
+        res.status(200).json({ message: "Post: ", post });
     } catch (err) {
         res.status(500).json({
             message: "Internal Server Error",
