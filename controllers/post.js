@@ -195,10 +195,34 @@ exports.deletePostById = async (req, res) => {
             author: loggedInUser,
             _id: postId,
         });
-        if(!deletePost) {
+        if (!deletePost) {
             return res.status(404).json({ message: "Post not found!" });
         }
         res.status(200).json({ message: "Post deleted successfully!" });
+    } catch (err) {
+        res.status(500).json({
+            message: "Internal Server Error",
+            error: err.message,
+        });
+    }
+};
+
+exports.updatePostById = async (req, res) => {
+    try {
+        const postId = req.params.id;
+        const loggedInUser = req.user._id;
+
+        const { title, category, tags, content, status } = req.body;
+
+        const updatePost = await Post.findOneAndUpdate(
+            { _id: postId, author: loggedInUser },
+            { title, category, tags, content, status },
+            { new: true, runValidators: true },
+        );
+        if(!updatePost) {
+            return res.status(404).json({ message: "Post not found!" });
+        }
+        res.status(200).json({ message: "Post updated successfully", updatePost });
     } catch (err) {
         res.status(500).json({
             message: "Internal Server Error",
