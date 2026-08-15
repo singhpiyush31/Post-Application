@@ -1,4 +1,5 @@
 const Post = require("../models/post");
+const Comment = require("../models/comment");
 
 exports.createPost = async (req, res) => {
     try {
@@ -217,12 +218,46 @@ exports.updatePostById = async (req, res) => {
         const updatePost = await Post.findOneAndUpdate(
             { _id: postId, author: loggedInUser },
             { title, category, tags, content, status },
-            { new: true, runValidators: true },
+            { returnDocument: "after", runValidators: true },
         );
-        if(!updatePost) {
+        if (!updatePost) {
             return res.status(404).json({ message: "Post not found!" });
         }
-        res.status(200).json({ message: "Post updated successfully", updatePost });
+        res.status(200).json({
+            message: "Post updated successfully",
+            updatePost,
+        });
+    } catch (err) {
+        res.status(500).json({
+            message: "Internal Server Error",
+            error: err.message,
+        });
+    }
+};
+
+exports.createComment = async (req, res) => {
+    try {
+        const postId = req.params.postId;
+        const loggedInUser = req.user._id;
+        const { comment } = req.body;
+
+        if (!comment) {
+            return res.status(400).json({ message: "Comment is required! " });
+        }
+        const post = await Post.findOne({ _id: postId, status: "Published" });
+        if (!post) {
+            return res.status(404).json({ message: "Post not found! " });
+        }
+        const newComment = new Comment({
+            comment,
+            post: postId,
+            user: loggedInUser,
+        });
+        await newComment.save();
+        res.status(201).json({
+            message: "Comment Added Successfully!",
+            comment: newComment,
+        });
     } catch (err) {
         res.status(500).json({
             message: "Internal Server Error",

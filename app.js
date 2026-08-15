@@ -5,6 +5,7 @@ const cookieParser = require("cookie-parser");
 const { connectDB } = require("./config/database");
 const authRouter = require("./routes/auth");
 const postRouter = require("./routes/post");
+const commentRouter = require("./routes/comment");
 
 const app = express();
 app.use(express.json());
@@ -12,6 +13,7 @@ app.use(cookieParser());
 
 app.use("/auth", authRouter);
 app.use("/post", postRouter);
+app.use("/comment", commentRouter);
 
 const PORT = process.env.PORT || 7777;
 
