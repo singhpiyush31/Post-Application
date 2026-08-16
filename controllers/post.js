@@ -269,6 +269,11 @@ exports.createComment = async (req, res) => {
 exports.getComment = async (req, res) => {
     try {
         const postId = req.params.postId;
+        const validPost = await Post.findOne({_id: postId, status: "Published"});
+
+        if(!validPost) {
+            return res.status(404).json({ message: "Post not available" });
+        }
 
         let page = parseInt(req.query.page) || 1;
         let limit = parseInt(req.query.limit) || 10;
