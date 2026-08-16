@@ -265,3 +265,45 @@ exports.createComment = async (req, res) => {
         });
     }
 };
+
+exports.getComment = async (req, res) => {
+    try {
+        const postId = req.params.postId;
+
+        let page = parseInt(req.query.page) || 1;
+        let limit = parseInt(req.query.limit) || 10;
+
+        if (page <= 0) page = 1;
+        if (limit <= 0) limit = 10;
+        if (limit > 50) limit = 50;
+
+        const skip = (page - 1) * limit;
+
+        let sort = -1;
+        if (req.query.sort == "oldest") sort = 1;
+
+        const totalComments = await Comment.countDocuments({ post: postId });
+        const totalPages = Math.ceil(totalComments / limit);
+
+        const comment = await Comment.find({ post: postId })
+            .populate("user", "name email")
+            .sort({ createdAt: sort })
+            .skip(skip)
+            .limit(limit);
+
+        res.status(200).json({
+            message: "Comments: ",
+            comment,
+            pages: totalPages,
+            page: page,
+            limit: limit,
+            totalComments: totalComments,
+        });
+
+    } catch (err) {
+        res.status(500).json({
+            message: "Internal Server Error",
+            error: err.message,
+        });
+    }
+};
