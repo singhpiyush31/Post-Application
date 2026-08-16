@@ -199,6 +199,7 @@ exports.deletePostById = async (req, res) => {
         if (!deletePost) {
             return res.status(404).json({ message: "Post not found!" });
         }
+        await Comment.deleteMany({ post: postId });
         res.status(200).json({ message: "Post deleted successfully!" });
     } catch (err) {
         res.status(500).json({

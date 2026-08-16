@@ -3,7 +3,6 @@ const jwt = require("jsonwebtoken");
 
 const User = require("../models/user");
 
-
 exports.register = async (req, res) => {
     try {
         const { name, email, password } = req.body;
@@ -57,8 +56,7 @@ exports.login = async (req, res) => {
                 .status(400)
                 .json({ message: "Invalid format. Please check your email." });
         }
-        
-        
+
         const user = await User.findOne({ email: email });
         if (!user) {
             return res.status(400).json({ message: "Invalid Credentials" });
@@ -74,6 +72,18 @@ exports.login = async (req, res) => {
         res.cookie("token", token, { maxAge: 7 * 24 * 60 * 60 * 1000 })
             .status(200)
             .json({ message: "LoggedIn Successfully!" });
+    } catch (err) {
+        res.status(500).json({
+            message: "Internal Server Error",
+            error: err.message,
+        });
+    }
+};
+
+exports.logout = async (req, res) => {
+    try {
+        res.cookie("token", "", { maxAge: 0 });
+        res.status(200).json({ message: "Logout Successfully!" });
     } catch (err) {
         res.status(500).json({
             message: "Internal Server Error",
