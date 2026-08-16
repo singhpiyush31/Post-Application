@@ -1,4 +1,4 @@
-# Scrrible
+# Post Application
 
 A blogging REST API built with **Node.js**, **Express 5**, and **MongoDB (Mongoose)**.
 
@@ -53,7 +53,7 @@ Users can register and log in, write posts as drafts and publish them, and comme
 ## Project Structure
 
 ```
-Scrrible/
+Post-Application/
 ├── app.js                       # Entry point: middleware, route mounting, DB connect, listen
 ├── config/
 │   └── database.js              # Mongoose connection helper
@@ -98,7 +98,7 @@ Create a `.env` file in the project root (see [Environment Variables](#environme
 
 ```bash
 PORT=7777
-MONGO_URL=mongodb://127.0.0.1:27017/scrrible
+MONGO_URL=mongodb://127.0.0.1:27017/post-application
 JWT_SECRET=replace-with-a-long-random-string
 ```
 
